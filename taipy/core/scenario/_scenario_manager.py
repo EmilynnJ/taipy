@@ -11,7 +11,7 @@
 
 from datetime import datetime
 from functools import partial
-from typing import Any, Callable, Dict, List, Literal, Optional, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, Set, Union
 
 from taipy.common.config import Config
 
@@ -525,7 +525,11 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
 
     @classmethod
     def _duplicate(
-        cls, scenario: Scenario, new_creation_date: Optional[datetime] = None, new_name: Optional[str] = None
+        cls,
+        scenario: Scenario,
+        new_creation_date: Optional[datetime] = None,
+        new_name: Optional[str] = None,
+        data_to_duplicate: Union[bool, Set[str]] = True
     ) -> Scenario:
         """Create a duplicated scenario with its related entities.
 
@@ -538,14 +542,16 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
                 If not provided, the current date and time is used.
             new_name (Optional[str]): The name of the new scenario. If not provided, the
                 name of the original scenario is used.
-
+            data_to_duplicate (Union[Set[str], bool]): A set of data node configuration ids used
+                to duplicate only the data nodes' data with the specified configuration ids.
+                If True, all data nodes are duplicated. If False, no data nodes are duplicated.
         Returns:
             The newly created scenario.
         """
         reasons = cls._can_duplicate(scenario)
         if not reasons:
             raise Exception(reasons.reasons)
-        return _ScenarioDuplicator(scenario).duplicate(new_creation_date, new_name)
+        return _ScenarioDuplicator(scenario, data_to_duplicate).duplicate(new_creation_date, new_name)
 
     @classmethod
     def _can_duplicate(cls, scenario: Union[str, Scenario]) -> ReasonCollection:

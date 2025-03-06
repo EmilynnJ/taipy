@@ -888,10 +888,10 @@ class TestTaipy:
 
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._duplicate") as mck:
             tp.duplicate_scenario(scenario)
-            mck.assert_called_once_with(scenario, None, None)
+            mck.assert_called_once_with(scenario, None, None, True)
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._duplicate") as mck:
             tp.duplicate_scenario(scenario, datetime.datetime(2022, 2, 5))
-            mck.assert_called_once_with(scenario, datetime.datetime(2022, 2, 5), None)
+            mck.assert_called_once_with(scenario, datetime.datetime(2022, 2, 5), None, True)
         with mock.patch("taipy.core.scenario._scenario_manager._ScenarioManager._duplicate") as mck:
             tp.duplicate_scenario(scenario, datetime.datetime(2022, 2, 5), "displayable_name")
-            mck.assert_called_once_with(scenario, datetime.datetime(2022, 2, 5), "displayable_name")
+            mck.assert_called_once_with(scenario, datetime.datetime(2022, 2, 5), "displayable_name", True)

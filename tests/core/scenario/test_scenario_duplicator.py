@@ -10,6 +10,8 @@
 # specific language governing permissions and limitations under the License.
 
 from datetime import datetime, timedelta
+from unittest import mock
+from unittest.mock import call
 
 from taipy import Config, Frequency, Scope, Sequence
 from taipy.core.cycle._cycle_manager import _CycleManager
@@ -638,3 +640,23 @@ def test_duplicate_with_all_global_dn():
     assert len(dn_2._properties) == len(new_dn_2._properties)
     for k, v in dn_2._properties.items():
         assert new_dn_2._properties[k] == v
+
+
+def test_data_duplication():
+    dn_config_1 = Config.configure_pickle_data_node("dn_1")
+    dn_config_2 = Config.configure_json_data_node("dn_2")
+    dn_config_3 = Config.configure_generic_data_node("dn_3", read_fct=print)
+    dn_config_4 = Config.configure_in_memory_data_node("dn_4")
+    scenario_config_1 = Config.configure_scenario(
+        "scenario_1",
+        [],
+        additional_data_node_configs=[dn_config_1, dn_config_2, dn_config_3, dn_config_4])
+    scenario = _ScenarioManager._create(scenario_config_1)
+
+    with mock.patch("taipy.core.data._data_duplicator._DataDuplicator.duplicate_data") as mck:
+        new_scenario = _ScenarioDuplicator(scenario, True).duplicate(datetime.now(), "new")
+        mck.assert_has_calls([call(new_scenario.dn_1), call(new_scenario.dn_2)], any_order=True)
+
+    with mock.patch("taipy.core.data._data_duplicator._DataDuplicator.duplicate_data") as mck:
+        new_scenario = _ScenarioDuplicator(scenario, {"dn_1", "dn_3"}).duplicate(datetime.now(), "new")
+        mck.assert_called_once_with(new_scenario.dn_1)

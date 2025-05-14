@@ -24,11 +24,12 @@ class _Reloader:
 
     _instance = None
     _lock = threading.RLock()
+    _managers: Dict[str, Type[_Manager]] = {}
 
     def __new__(cls, *args, **kwargs):
         with cls._lock:
             if not isinstance(cls._instance, cls):
-                cls._instance = super().__new__(cls *args, **kwargs)
+                cls._instance = super().__new__(cls, *args, **kwargs)
                 cls._instance._no_reload_context = False  # Initialize once
                 cls._instance._context_depth = 0  # Track nested `with` usage
             cls._managers = cls._build_managers()

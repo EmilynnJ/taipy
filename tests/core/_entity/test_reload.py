@@ -8,6 +8,8 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+from datetime import datetime
+
 import pytest
 
 import taipy as tp
@@ -36,7 +38,8 @@ class TestReloader:
     def test_single_context(self):
         dn = tp.create_global_data_node(Config.configure_data_node("dn1", scope=tp.Scope.GLOBAL))
         assert len(dn.edits) == 0
-        dn.track_edit(comments="inside") # creates a new edit in memory without saving the data node
+        edit = {"comments": "inside", "timestamp": datetime.now()}
+        dn._edits.append(edit) # add a new edit in memory without saving the data node
         reloader = _Reloader()
         with reloader:
             assert reloader._context_depth == 1
@@ -49,7 +52,8 @@ class TestReloader:
     def test_nested_contexts(self):
         dn = tp.create_global_data_node(Config.configure_data_node("dn1", scope=tp.Scope.GLOBAL))
         assert len(dn.edits) == 0
-        dn.track_edit(comments="inside") # creates a new edit in memory without saving the data node
+        edit = {"comments": "inside", "timestamp": datetime.now()}
+        dn._edits.append(edit)  # add a new edit in memory without saving the data node
         reloader = _Reloader()
         with reloader:
             assert reloader._context_depth == 1

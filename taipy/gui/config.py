@@ -239,7 +239,7 @@ class _Config(object):
             config["use_reloader"] = False
 
     def _handle_run_browser(self, args, config):
-        config["run_browser"] = False
+        config["run_browser"] = True
         if "--run-browser" in sys.argv:
             config["run_browser"] = True
         if "--no-run-browser" in sys.argv:

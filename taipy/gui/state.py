@@ -153,6 +153,34 @@ class State(SimpleNamespace, metaclass=ABCMeta):
     @abstractmethod
     def _invoke_on_gui(self, method: t.Callable, *args: t.Any) -> t.Any: ...
 
+    @abstractmethod
+    def patch(self, name: str, change: t.Optional[dict] = None, remove: t.Optional[dict] = None):
+        """Patch a variable on a client.
+
+        The connected client will receive an update of the variable called *name* with the
+        provided change and/or remove description.
+
+        Arguments:
+            name (str): The variable name to update.
+            change (dict, optional): A dictionary describing the changes to apply to the variable.
+                Defaults to None.
+            remove (dict, optional): A dictionary describing the elements to remove from the variable.
+                Defaults to None.
+
+        TODO: Add examples here.
+        state.patch("data", change={"y": "anything"})
+        state.patch("data", change={"a": {"b": "anything"}})
+        state.patch("data", change={"y": {4: "something"}})
+        state.patch("data", change={"y": {4: ["something", "else"]}})
+        state.patch("data", change={"y": {4: [{"b": "patch object in list", "c": "else"}]}})
+        state.patch("data", remove={"y": None})
+
+        Not supported yet:
+        patch dataframe on the back end (the data is patched on the front end)
+        patch sorted data in a table (the wrong data will be patched if the table is sorted)
+        """
+        ...
+
 
 class _GuiState(State):
     __gui_attr = "_gui"
@@ -165,6 +193,7 @@ class _GuiState(State):
         "assign",
         "broadcast",
         "get_gui",
+        "patch",
         "refresh",
         "set_favicon",
         "_set_context",
@@ -198,6 +227,10 @@ class _GuiState(State):
         with self._set_context(self._gui):
             encoded_name = self._gui._bind_var(name)  # type: ignore[attr-defined]
             self._gui._broadcast_all_clients(encoded_name, value)  # type: ignore[attr-defined]
+
+    def patch(self, name: str, change: t.Optional[dict] = None, remove: t.Optional[dict] = None):
+        with self._set_context(self._gui):
+            self._gui._patch_variable(name, change, remove, getattr(self, name, None))  # type: ignore[attr-defined]
 
     def __getattribute__(self, name: str) -> t.Any:
         if name == "__class__":

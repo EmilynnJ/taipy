@@ -1888,13 +1888,19 @@
                         "name": "anchor",
                         "type": "str",
                         "default_value": "\"left\"",
-                        "doc": "Anchor side of the pane.<br/>Valid values are \"left\", \"right\", \"top\", or \"bottom\"."
+                        "doc": "Anchor side of the pane.<br/>Valid values are \"left\", \"right\", \"top\", or \"bottom\" (or \"l\", \"r\", \"t\", or \"b\" for short)."
                     },
                     {
                         "name": "persistent",
                         "type": "bool",
                         "default_value": "False",
                         "doc": "If False, the pane covers the page where it appeared and disappears if the user clicks in the page.<br/>If True, the pane appears next to the page. Note that the parent section of the pane must have the <i>flex</i> display mode set. See below for an example using the <code>persistent</code> property."
+                    },
+                    {
+                        "name": "title",
+                        "type": "str",
+                        "default_value": "None",
+                        "doc": "The title of the opened pane, displayed next to the close button, when <i>persistent</i> is True."
                     },
                     {
                         "name": "width",

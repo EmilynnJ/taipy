@@ -8,6 +8,7 @@
 # Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
+import os
 import re
 import typing as t
 from unittest.mock import patch
@@ -49,9 +50,9 @@ class TgbLibrary(ElementLibrary):
         "e2": Element(
             "x",
             {
-                "p1": ElementProperty(PropertyType.any),
-                "p2": ElementProperty(PropertyType.any),
-                "p3": ElementProperty(PropertyType.any, type_hint="Union[bool,str]"),
+                "p1": ElementProperty(PropertyType.boolean),
+                "p2": ElementProperty(PropertyType.boolean),
+                "p3": ElementProperty(PropertyType.boolean, type_hint="Union[bool,str]"),
             },
             "E2",
         ),
@@ -65,7 +66,7 @@ class TgbLibrary(ElementLibrary):
 
 
 def test_tgb_generation(gui: Gui, test_client, helpers):
-    from taipy.gui.extension.__main__ import generate_doc
+    from taipy.gui.extension._main._generate_tgb import generate_doc
 
     library = TgbLibrary()
     api = generate_doc(library)
@@ -91,13 +92,17 @@ def test_tgb_generation(gui: Gui, test_client, helpers):
 
 
 def test_tgb_generation_entry_point(gui: Gui, test_client, helpers):
-    import os
     import tempfile
 
     from taipy.gui.extension.__main__ import main
 
+    saved_cwd = os.getcwd()
     temp_file = tempfile.NamedTemporaryFile(delete=False)
     temp_file.close()
-    with patch("sys.argv", ["main", "generate_tgb", "extlib_test", temp_file.name]):
-        assert main() == 0
-    os.remove(temp_file.name)
+    os.chdir(os.path.dirname(__file__))
+    try:
+        with patch("sys.argv", ["main", "generate_tgb", "extlib_test", temp_file.name]):
+            assert main() == 0
+    finally:
+        os.chdir(saved_cwd)
+        os.remove(temp_file.name)
